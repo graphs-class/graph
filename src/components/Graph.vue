@@ -21,6 +21,11 @@
             <span class="icon icon-search icon-text"></span>
             Breadth First Search
           </button>
+		  
+		  <button @click="animateSearch('prim')" class="btn btn-default">
+            <span class="icon icon-search icon-text"></span>
+            Prim
+          </button>
         </div>
       </header>
     </template>
@@ -32,7 +37,7 @@
 <script>
 import vis from 'vis'
 import {mapGetters, mapMutations} from 'vuex'
-import {animatedDfs, animatedBfs} from '../lib/animations'
+import {animatedDfs, animatedBfs, animatePrim} from '../lib/animations'
 
 // Vis doesn't work properly inside a Vue component state
 let network
@@ -127,7 +132,8 @@ export default {
 
       const animate = ({
         dfs: animatedDfs,
-        bfs: animatedBfs
+        bfs: animatedBfs,
+        prim: animatePrim
       })[algorithm]
 
       const start = this.selected

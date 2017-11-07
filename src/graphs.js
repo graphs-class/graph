@@ -99,5 +99,32 @@ export default [
       {from: 7, to: 11},
       {from: 7, to: 12}
     ]
+  },
+  {
+    id: id++,
+    name: 'Weighted Undirected',
+    description: '11/07/2017',
+
+    options: {
+      layout: {
+        randomSeed: 2,
+        hierarchical: false
+      }
+    },
+
+    nodes: Array.from(Array(6), (_, i) => ({id: i + 1, label: `${i + 1}`})),
+
+    edges: [
+      {from: 1, to: 2, label: '1'},
+      {from: 1, to: 3, label: '3'},
+      {from: 2, to: 3, label: '1'},
+      {from: 2, to: 4, label: '1'},
+      {from: 3, to: 5, label: '2'},
+      {from: 2, to: 5, label: '4'},
+      {from: 3, to: 4, label: '3'},
+      {from: 4, to: 5, label: '2'},
+      {from: 4, to: 6, label: '1'},
+      {from: 5, to: 6, label: '2'}
+    ]
   }
 ]

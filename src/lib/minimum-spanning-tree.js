@@ -53,3 +53,39 @@ export function * kruskal (network, nodes, edges) {
     T = H.shift()
   }
 }
+
+function connectedEdges (edgeA, edgeB) {
+  return edgeA.from === edgeB.from ||
+		 edgeA.from === edgeB.to   ||
+		 edgeA.to   === edgeB.from ||
+		 edgeA.to   === edgeB.to
+}
+
+function conectedComponents (others, component) {
+  return others
+	.filter(edges =>
+	  edges.some(otherEdge => 
+		component.some(edge => connectedEdges(edge, otherEdge))
+	  )
+	)
+}
+
+function minimalConnectedComponent (others, component) {
+  let min
+  let pairedComponent
+  
+  for (let edges of others) {
+	const connectedEdges = edges.filter( )
+  }
+}
+
+export function * boruvka (network, nodes, edges) {
+  const components = edges.map(edge => [edge])
+
+  while (components.length > 1) {
+	for (let [i, component] of components.entries()) {
+	  const others = components.filter((_, j) => i !== j)
+	  const connected = conectedComponents(others, component)
+	}
+  }  
+}

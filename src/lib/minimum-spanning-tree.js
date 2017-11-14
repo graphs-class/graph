@@ -1,30 +1,55 @@
+import {DataSet} from 'vis'
+import {dfs} from './search'
+
+function sameSet (A, B) {
+  return contains(A, B) && contains(B, A)
+}
+
+function contains (A, B) {
+  return Array.from(B.values()).every(v => A.has(v))
+}
+
+function hasCycle (network) {
+  const anyEdgeId = network.body.edgeIndices[0]
+  const {from} = network.body.edges[anyEdgeId]
+  return Array.from(dfs(network, from.id))
+    .some(([edgeId], i, ref) =>
+      ref.slice(i + 1).find(([otherId]) => edgeId === otherId)
+    )
+}
+
 export function * prim (network, nodes, edges, v) {
+  const edgeSet = new DataSet(edges)
+  const N = new Set(nodes.map(({id}) => id))
   const T = new Set([v])
-  const V = new Set(nodes.map(x => x).filter(({id}) => id !== v))
+  const V = new Set(nodes.map(({id}) => id).filter(id => id !== v))
 
-  let minEdge = network.body.nodes[0]
-  for (let i = 1; i < network.body.nodes[v].edges.length; i++) {
-    const {id, from: {id: fromId}, to: {id: toId}} = network.body.nodes[v].edges[i]
+  while (!sameSet(N, T)) {
+    const {from, to, label} = edgeSet.get({
+      filter ({from, to}) {
+        return (T.has(from) && V.has(to)) ||
+               (V.has(from) && T.has(to))
+      }
+    })
+      .reduce((a, b) => +a.label < +b.label ? a : b)
 
-    console.log(edges.get(id))
+    const k = V.has(from) ? from : to
+    T.add(k)
+    V.delete(k)
 
-    let j, k
-
-    if (T.has(fromId) && V.has(toId)) {
-      j = fromId
-      k = toId
-    }
-
-    if (T.has(toId) && V.has(fromId)) {
-      j = toId
-      k = fromId
-    }
-
-    if (j && k) {
-      minEdge = Math.min(minEdge, +edges.get(id).label)
-    }
+    yield {from, to, label}
   }
-  console.log({T, V})
+}
 
-  yield
+export function * kruskal (network, nodes, edges) {
+  const H = edges.sort((a, b) => (+a.label) - (+b.label))
+  let T = H.shift()
+
+  while (H.length) {
+    yield T
+    if (hasCycle(network)) {
+      return alert('Graph has cycle')
+    }
+    T = H.shift()
+  }
 }

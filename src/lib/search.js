@@ -1,4 +1,5 @@
 export function * dfs (network, v, marked = new Set(), exploredEdges = new Set()) {
+  console.log(arguments)
   marked.add(v)
 
   for (let i = 0; i < network.body.nodes[v].edges.length; i++) {

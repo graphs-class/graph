@@ -21,10 +21,19 @@
             <span class="icon icon-search icon-text"></span>
             Breadth First Search
           </button>
-		  
+
 		  <button @click="animateSearch('prim')" class="btn btn-default">
             <span class="icon icon-search icon-text"></span>
             Prim
+          </button>
+        </div>
+      </header>
+
+      <header v-else class="toolbar toolbar-header">
+        <div class="toolbar-actions">
+          <button @click="animateSearch('kruskal')" class="btn btn-default">
+            <span class="icon icon-search icon-text"></span>
+            Kruskal
           </button>
         </div>
       </header>
@@ -37,7 +46,7 @@
 <script>
 import vis from 'vis'
 import {mapGetters, mapMutations} from 'vuex'
-import {animatedDfs, animatedBfs, animatePrim} from '../lib/animations'
+import {animatedDfs, animatedBfs, animatePrim, animateKruskal} from '../lib/animations'
 
 // Vis doesn't work properly inside a Vue component state
 let network
@@ -50,21 +59,11 @@ export default {
     options: {},
 
     selected: false,
-    animation: false
+    animation: false,
+    backup: {nodes: false, edges: false}
   }),
   mounted () {
-    const container = this.$refs.network
-    const data = {
-      nodes: [],
-      edges: []
-    }
-    const options = {}
-    network = new vis.Network(container, data, options)
-
-    network.on('click', this.onClick)
-    network.on('doubleClick', this.onDoubleClick)
-
-    window.network = network
+    this.mountNetwork()
 
     if (!this.currentGraph && this.graphs.length) {
       this.setCurrentGraphId(this.graphs[0].id)
@@ -76,26 +75,44 @@ export default {
         return
       }
 
-      network.setData({
-        nodes: this.graph.nodes,
-        edges: this.graph.edges
-      })
-      network.setOptions(this.graph.options)
+      this.mountNetwork()
     }
   },
   computed: {
     ...mapGetters(['currentGraph', 'graphs']),
 
     graph () {
-      if (this.animation) {
-        return {edges: this.edges, nodes: this.nodes, options: this.options}
-      }
-
       return this.currentGraph
     }
   },
   methods: {
     ...mapMutations(['setCurrentGraphId']),
+
+    mountNetwork () {
+      if (!this.graph) {
+        return
+      }
+
+      if (network) {
+        network.destroy()
+        network = false
+      }
+
+      const container = this.$refs.network
+      this.nodes = new vis.DataSet(this.graph.nodes)
+      this.edges = new vis.DataSet(this.graph.edges)
+      const data = {
+        nodes: this.nodes,
+        edges: this.edges
+      }
+      const options = this.graph.options
+      network = new vis.Network(container, data, options)
+
+      network.on('click', this.onClick)
+      network.on('doubleClick', this.onDoubleClick)
+
+      window.network = network
+    },
 
     onClick (event) {
       this.selectNode(event.nodes[0])
@@ -125,19 +142,20 @@ export default {
     },
 
     animateSearch: async function (algorithm) {
-      this.nodes = new vis.DataSet(this.currentGraph.nodes)
-      this.edges = new vis.DataSet(this.currentGraph.edges)
-      this.options = this.currentGraph.options
+      this.backup.nodes = this.graph.nodes
+      this.backup.edges = this.graph.edges
       this.animation = true
 
       const animate = ({
         dfs: animatedDfs,
         bfs: animatedBfs,
-        prim: animatePrim
+        prim: animatePrim,
+        kruskal: animateKruskal
       })[algorithm]
 
       const start = this.selected
       this.focusOnNode(start)
+      console.log({network})
       const it = animate(network, this.nodes, this.edges, start)
 
       let done = false
@@ -151,6 +169,9 @@ export default {
 
     stopAnimation () {
       this.animation = false
+      this.graph.nodes = this.backup.nodes
+      this.graph.edges = this.backup.edges
+      this.mountNetwork()
     }
   }
 }

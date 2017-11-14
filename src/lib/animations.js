@@ -1,5 +1,5 @@
 import {dfs, bfs} from './search'
-import {prim} from './minimum-spanning-tree'
+import {prim, kruskal} from './minimum-spanning-tree'
 
 export function * animatedDfs (network, nodes, edges, start) {
   let n = 1
@@ -50,29 +50,21 @@ export function * animatedBfs (network, nodes, edges, start) {
 }
 
 export function * animatePrim (network, nodes, edges, start) {
-  // let n = 1
+  const backupEdges = edges.get().slice()
+  edges.remove(edges.map(({id}) => id))
 
-  for (let a of prim(network, nodes, edges, start)) {
-    console.log({a})
-    /*
-    const edge = edges.get(edgeId)
-    const {from, to} = edge
+  for (let edge of prim(network, nodes, backupEdges, start)) {
+    edges.add(edge)
+    yield
+  }
+}
 
-    edges.update({id: edgeId, label: `(${n++}) ${path}`})
+export function * animateKruskal (network, nodes, edges) {
+  const backupEdges = edges.get().slice()
+  edges.remove(edges.map(({id}) => id))
 
-    nodes.update({id: from, color: 'red'})
-    nodes.update({id: to, color: 'blue'})
-    */
-    /*
-    const toFocus = path === 'return' ? from : to
-    network.view.focus(toFocus, {
-      scale: 1.5,
-      animation: {
-        duration: 500, easingFunction: 'easeInOutQuad'
-      }
-    })
-    */
-
+  for (let edge of kruskal(network, nodes, backupEdges)) {
+    edges.add(edge)
     yield
   }
 }

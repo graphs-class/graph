@@ -1,6 +1,10 @@
 import {DataSet} from 'vis'
 import {dfs} from './search'
 
+function xor (p, q) {
+  return p && !q
+}
+
 function sameSet (A, B) {
   return contains(A, B) && contains(B, A)
 }
@@ -112,6 +116,13 @@ export function * boruvka (network, nodes, edges) {
   while (components.length > 1) {
 	const edges = []
 	for (let component of components) {
+	  const m = component
+		.map(node => connectedTo(edges, node))
+		.filter(({from, to}) =>
+		  xor(component.includes(from), component.includes(to))
+		)
+		.sort((a, b) => (+a.label) - (+b.label))
+		.shift()
 	  for (let node of component) {
 	    const m = connectedTo(edges, node)
 		  .filter(({from, to}) =>

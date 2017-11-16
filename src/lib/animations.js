@@ -1,5 +1,5 @@
 import {dfs, bfs} from './search'
-import {prim, kruskal} from './minimum-spanning-tree'
+import {prim, kruskal, boruvka} from './minimum-spanning-tree'
 
 export function * animatedDfs (network, nodes, edges, start) {
   let n = 1
@@ -64,6 +64,16 @@ export function * animateKruskal (network, nodes, edges) {
   edges.remove(edges.map(({id}) => id))
 
   for (let edge of kruskal(network, nodes, backupEdges)) {
+    edges.add(edge)
+    yield
+  }
+}
+
+export function * animateBoruvka (network, nodes, edges) {
+  const backupEdges = edges.get().slice()
+  edges.remove(edges.map(({id}) => id))
+
+  for (let edge of boruvka(network, nodes, backupEdges)) {
     edges.add(edge)
     yield
   }

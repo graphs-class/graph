@@ -79,6 +79,7 @@ function minimalConnectedComponent (others, component) {
   }
 }
 
+/*
 export function * boruvka (network, nodes, edges) {
   const components = edges.map(edge => [edge])
 
@@ -88,4 +89,45 @@ export function * boruvka (network, nodes, edges) {
 	  const connected = conectedComponents(others, component)
 	}
   }  
+}
+*/
+
+function connects (edge, a, b) {
+  return (edge.from === a && edge.to === b) ||
+	     (edge.from === b && edge.to === a)
+}
+
+function connectedTo (edges, node) {
+  return edges
+	.filter(({to, from}) => from === node || to === node)
+	/*.map(edge => ({
+	  node: edge.from === node ? edge.to : edge.from,
+	  label: edge.label
+	}))*/
+}
+
+export function * boruvka (network, nodes, edges) {
+  const components = edges.map(edge => [edge])
+  
+  while (components.length > 1) {
+	const edges = []
+	for (let component of components) {
+	  for (let node of component) {
+	    const m = connectedTo(edges, node)
+		  .filter(({from, to}) =>
+		    (from === node && !component.includes(to)) ||
+		    (to === node && !component.includes(from))	
+		  )
+		  .sort((a, b) => (+a.label) - (+b.label))
+		  .shift()
+	  }
+	  
+	  if (!edges.some(({id}) => m.id)) {
+		edges.append(m)
+	  }
+	  
+	  console.log({m, component, edges})
+	  yield
+	}
+  }
 }

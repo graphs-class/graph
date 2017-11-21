@@ -71,11 +71,14 @@ export function * animateKruskal (network, nodes, edges) {
 
 export function * animateBoruvka (network, nodes, edges) {
   const backupEdges = edges.get()
-  console.log({backupEdges})
+
+  if (!backupEdges.every(({label}) => +label)) {
+    return alert('Cannot run Boruvka algorithm on a non-weighted graph')
+  }
+
   edges.remove(edges.map(({id}) => id))
 
   for (let edge of boruvka(network, nodes, backupEdges)) {
-    console.log({edge})
     edges.add(edge)
     yield
   }

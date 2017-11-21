@@ -36,10 +36,14 @@
             Kruskal
           </button>
 
-		  <button @click="animateSearch('boruvka')" class="btn btn-default">
+          <button @click="animateSearch('boruvka')" class="btn btn-default">
             <span class="icon icon-search icon-text"></span>
             Boruvka
           </button>
+
+          |
+
+          <span>Click on some node for more algorithms</span>
         </div>
       </header>
     </template>
@@ -161,7 +165,6 @@ export default {
 
       const start = this.selected
       this.focusOnNode(start)
-      console.log({network})
       const it = animate(network, this.nodes, this.edges, start)
 
       let done = false

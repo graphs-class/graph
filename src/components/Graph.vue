@@ -35,7 +35,7 @@
             <span class="icon icon-search icon-text"></span>
             Kruskal
           </button>
-		  
+
 		  <button @click="animateSearch('boruvka')" class="btn btn-default">
             <span class="icon icon-search icon-text"></span>
             Boruvka
@@ -156,7 +156,7 @@ export default {
         bfs: animatedBfs,
         prim: animatePrim,
         kruskal: animateKruskal,
-		boruvka: animateBoruvka
+        boruvka: animateBoruvka
       })[algorithm]
 
       const start = this.selected

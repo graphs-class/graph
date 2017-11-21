@@ -68,7 +68,7 @@ function connectedEdges (edgeA, edgeB) {
 function conectedComponents (others, component) {
   return others
 	.filter(edges =>
-	  edges.some(otherEdge => 
+	  edges.some(otherEdge =>
 		component.some(edge => connectedEdges(edge, otherEdge))
 	  )
 	)
@@ -77,7 +77,7 @@ function conectedComponents (others, component) {
 function minimalConnectedComponent (others, component) {
   let min
   let pairedComponent
-  
+
   for (let edges of others) {
 	const connectedEdges = edges.filter( )
   }
@@ -92,53 +92,51 @@ export function * boruvka (network, nodes, edges) {
 	  const others = components.filter((_, j) => i !== j)
 	  const connected = conectedComponents(others, component)
 	}
-  }  
+  }
 }
 */
 
 function connects (edge, a, b) {
   return (edge.from === a && edge.to === b) ||
-	     (edge.from === b && edge.to === a)
+	       (edge.from === b && edge.to === a)
 }
 
 function connectedTo (edges, node) {
   return edges
-	.filter(({to, from}) => from === node || to === node)
-	/*.map(edge => ({
-	  node: edge.from === node ? edge.to : edge.from,
-	  label: edge.label
-	}))*/
+    .filter(({to, from}) => from === node.id || to === node.id)
 }
 
 export function * boruvka (network, nodes, edges) {
-  const components = edges.map(edge => [edge])
-  
+  const components = nodes.map(edge => [edge])
+
   while (components.length > 1) {
-	const edges = []
-	for (let component of components) {
-	  const m = component
-		.map(node => connectedTo(edges, node))
-		.filter(({from, to}) =>
-		  xor(component.includes(from), component.includes(to))
-		)
-		.sort((a, b) => (+a.label) - (+b.label))
-		.shift()
-	  for (let node of component) {
-	    const m = connectedTo(edges, node)
-		  .filter(({from, to}) =>
-		    (from === node && !component.includes(to)) ||
-		    (to === node && !component.includes(from))	
-		  )
-		  .sort((a, b) => (+a.label) - (+b.label))
-		  .shift()
-	  }
-	  
-	  if (!edges.some(({id}) => m.id)) {
-		edges.append(m)
-	  }
-	  
-	  console.log({m, component, edges})
-	  yield
-	}
+    const edgesToAdd = []
+
+    for (let component of components) {
+      let edgeId = false
+      let edgeLabel = +Infinity
+
+      for (let node of component) {
+        for (
+          let edge of
+            connectedTo(edges, node)
+              .filter(({from, to, label}) =>
+                (+label) > 0 &&
+                !component.some(({id}) => id === (node.id === from ? to : from))
+              )
+        ) {
+          if (edgeLabel > (+edge.label)) {
+            edgeLabel = +edge.label
+            edgeId = edge.id
+          }
+        }
+      }
+
+      if (!edgesToAdd.includes(edgeId)) {
+        const edge = edges.find(({id}) => id === edgeId)
+        edgesToAdd.push(edgeId)
+        yield edge
+      }
+    }
   }
 }

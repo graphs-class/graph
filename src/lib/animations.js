@@ -1,75 +1,68 @@
-import {dfs, bfs} from './search'
-import {prim, kruskal, boruvka} from './minimum-spanning-tree'
+import * as search from './search'
+import * as minimumSpanningTree from './minimum-spanning-tree'
 
-export function * animatedDfs (network, nodes, edges, start) {
+const COLOR_PRIMARY = '#8e44ad'
+const COLOR_SECONDARY = '#27ae60'
+
+export function * dfs (graph, start) {
   let n = 1
 
-  for (let [edgeId, path] of dfs(network, start)) {
-    const edge = edges.get(edgeId)
+  for (let [edgeId, path] of search.dfs(graph, start)) {
+    const edge = graph.edges.get(edgeId)
     const {from, to} = edge
 
-    edges.update({id: edgeId, label: `(${n++}) ${path}`})
+    const {nodes, edges} = graph
+    graph.updateEdge({id: edgeId, label: `(${n++}) ${path}`})
+      graph.updateNode({id: from, color: COLOR_PRIMARY})
+      graph.updateNode({id: to, color: COLOR_SECONDARY})
 
-    nodes.update({id: from, color: 'red'})
-    nodes.update({id: to, color: 'blue'})
+      const toFocus = path === 'return' ? from : to
+      graph.focusNode(toFocus)
+
+      yield
+    }
+  }
+
+export function * bfs (graph, start) {
+  let n = 1
+
+  for (let [edgeId, path] of search.bfs(graph, start)) {
+    const edge = graph.edges.get(edgeId)
+    const {from, to} = edge
+
+    graph.updateEdge({id: edgeId, label: `(${n++}) ${path}`})
+
+    graph.updateNode({id: from, color: COLOR_PRIMARY})
+    graph.updateNode({id: to, color: COLOR_SECONDARY})
 
     const toFocus = path === 'return' ? from : to
-    network.view.focus(toFocus, {
-      scale: 1.5,
-      animation: {
-        duration: 500, easingFunction: 'easeInOutQuad'
-      }
-    })
+    graph.focusNode(toFocus)
 
     yield
   }
 }
 
-export function * animatedBfs (network, nodes, edges, start) {
-  let n = 1
-
-  for (let [edgeId, path] of bfs(network, start)) {
-    const edge = edges.get(edgeId)
-    const {from, to} = edge
-
-    edges.update({id: edgeId, label: `(${n++}) ${path}`})
-
-    nodes.update({id: from, color: 'red'})
-    nodes.update({id: to, color: 'blue'})
-
-    const toFocus = path === 'return' ? from : to
-    network.view.focus(toFocus, {
-      scale: 1.5,
-      animation: {
-        duration: 500, easingFunction: 'easeInOutQuad'
-      }
-    })
-
-    yield
-  }
-}
-
-export function * animatePrim (network, nodes, edges, start) {
+export function * prim (graph, start) {
   const backupEdges = edges.get().slice()
   edges.remove(edges.map(({id}) => id))
 
-  for (let edge of prim(network, nodes, backupEdges, start)) {
+  for (let edge of minimumSpanningTree.prim(graph, start)) {
     edges.add(edge)
     yield
   }
 }
 
-export function * animateKruskal (network, nodes, edges) {
+export function * kruskal (graph, nodes, edges) {
   const backupEdges = edges.get().slice()
   edges.remove(edges.map(({id}) => id))
 
-  for (let edge of kruskal(network, nodes, backupEdges)) {
+  for (let edge of minimumSpanningTree.kruskal(graph, nodes, backupEdges)) {
     edges.add(edge)
     yield
   }
 }
 
-export function * animateBoruvka (network, nodes, edges) {
+export function * boruvka (graph, nodes, edges) {
   const backupEdges = edges.get()
 
   if (!backupEdges.every(({label}) => +label)) {
@@ -78,7 +71,7 @@ export function * animateBoruvka (network, nodes, edges) {
 
   edges.remove(edges.map(({id}) => id))
 
-  for (let edge of boruvka(network, nodes, backupEdges)) {
+  for (let edge of minimumSpanningTree.boruvka(graph, nodes, backupEdges)) {
     edges.add(edge)
     yield
   }
